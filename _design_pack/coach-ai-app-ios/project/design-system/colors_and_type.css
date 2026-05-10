@@ -1,0 +1,164 @@
+/* =========================================================================
+   Coach AI — Colors & Type
+   Dark-first identity system. Inspired by premium wearables.
+   ========================================================================= */
+
+/* Bricolage Grotesque — variable font from Google Fonts.
+   Replaces Inter as the Coach AI primary typeface. */
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap");
+
+:root {
+  /* ----- Backgrounds & surfaces ----- */
+  --bg-primary: #000000;     /* Ink — toile de fond */
+  --bg-surface: #0E0E10;     /* Cartes */
+  --bg-elevated: #151518;    /* Carte sur surface */
+  --bg-border: #27272A;      /* Séparateurs */
+
+  /* ----- Text & neutrals ----- */
+  --text-primary: #FFFFFF;
+  --text-secondary: #B7B7BD;
+  --text-tertiary: #6E6E76;
+
+  /* ----- Brand: Electric Blue (action) ----- */
+  --primary: #4A53FF;
+  --primary-hover: #6B73FF;
+  --primary-pressed: #2E37D9;
+
+  /* ----- Brand: Vital Green (KPI atteint) ----- */
+  --accent: #41FF31;
+  --accent-hover: #5DFF52;
+  --accent-pressed: #2BCF1E;
+
+  /* ----- Semantic ----- */
+  --success: #41FF31;
+  --warning: #FFB020;
+  --error:   #FF3B5C;
+  --info:    #00C8E6;
+
+  /* ----- Categories (alert left-border / icon / badge) ----- */
+  --cat-health:        #FF3B5C;
+  --cat-productivity:  #FFB020;
+  --cat-meeting:       #00C8E6;
+  --cat-rag:           #9D5CFF;
+
+  /* ----- Foreground aliases (legacy ergonomics) ----- */
+  --fg1: var(--text-primary);
+  --fg2: var(--text-secondary);
+  --fg3: var(--text-tertiary);
+
+  /* ----- Typography stack ----- */
+  --font-sans: "Bricolage Grotesque", "Inter", -apple-system, BlinkMacSystemFont, "Roboto", "Arial", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Courier New", monospace;
+
+  /* ----- Spacing (4px grid) ----- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* ----- Border radius ----- */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* ----- Type scale (size / weight / line-height) ----- */
+  --t-display-kpi:   72px; --t-display-kpi-w:   700; --t-display-kpi-lh:   1.00; --t-display-kpi-ls:   -0.02em;
+  --t-display:       48px; --t-display-w:       700; --t-display-lh:       1.10; --t-display-ls:       -0.01em;
+  --t-h1:            28px; --t-h1-w:            600; --t-h1-lh:            1.20;
+  --t-h2:            22px; --t-h2-w:            600; --t-h2-lh:            1.30;
+  --t-h3:            18px; --t-h3-w:            600; --t-h3-lh:            1.40;
+  --t-body-large:    17px; --t-body-large-w:    400; --t-body-large-lh:    1.50;
+  --t-body:          15px; --t-body-w:          400; --t-body-lh:          1.50;
+  --t-body-small:    13px; --t-body-small-w:    400; --t-body-small-lh:    1.50;
+  --t-label:         12px; --t-label-w:         500; --t-label-lh:         1.40; --t-label-ls: 0.06em;
+  --t-caption:       11px; --t-caption-w:       500; --t-caption-lh:       1.40; --t-caption-ls: 0.06em;
+
+  /* ----- Motion ----- */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out:      cubic-bezier(0, 0, 0.2, 1);
+  --duration-fast:   120ms;
+  --duration-base:   200ms;
+  --duration-slow:   320ms; /* Max 400ms per charte */
+
+  color-scheme: dark;
+}
+
+/* =========================================================================
+   Semantic element styles
+   ========================================================================= */
+html, body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11";
+}
+
+.kpi, .display-kpi {
+  font-size: var(--t-display-kpi);
+  font-weight: var(--t-display-kpi-w);
+  line-height: var(--t-display-kpi-lh);
+  letter-spacing: var(--t-display-kpi-ls);
+  font-variant-numeric: tabular-nums;
+}
+.display {
+  font-size: var(--t-display);
+  font-weight: var(--t-display-w);
+  line-height: var(--t-display-lh);
+  letter-spacing: var(--t-display-ls);
+}
+h1, .h1 {
+  font-size: var(--t-h1);
+  font-weight: var(--t-h1-w);
+  line-height: var(--t-h1-lh);
+  margin: 0;
+}
+h2, .h2 {
+  font-size: var(--t-h2);
+  font-weight: var(--t-h2-w);
+  line-height: var(--t-h2-lh);
+  margin: 0;
+}
+h3, .h3 {
+  font-size: var(--t-h3);
+  font-weight: var(--t-h3-w);
+  line-height: var(--t-h3-lh);
+  margin: 0;
+}
+.body-large { font-size: var(--t-body-large); line-height: var(--t-body-large-lh); }
+p, .body { font-size: var(--t-body); line-height: var(--t-body-lh); margin: 0; }
+.body-small, small { font-size: var(--t-body-small); line-height: var(--t-body-small-lh); }
+.label {
+  font-size: var(--t-label);
+  font-weight: var(--t-label-w);
+  letter-spacing: var(--t-label-ls);
+  text-transform: uppercase;
+}
+.caption {
+  font-size: var(--t-caption);
+  font-weight: var(--t-caption-w);
+  letter-spacing: var(--t-caption-ls);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+code, .mono {
+  font-family: var(--font-mono);
+  font-variant-ligatures: none;
+}
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* =========================================================================
+   Utility primitives (use sparingly; tokens are the source of truth)
+   ========================================================================= */
+.surface       { background: var(--bg-surface);  border: 1px solid var(--bg-border); border-radius: var(--radius-lg); }
+.surface-elev  { background: var(--bg-elevated); border: 1px solid var(--bg-border); border-radius: var(--radius-lg); }

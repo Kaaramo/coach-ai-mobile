@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Coach AI — Profil</title>
+<link rel="stylesheet" href="screens.css" />
+<link rel="stylesheet" href="dashboard.css" />
+<link rel="stylesheet" href="alerts.css" />
+<link rel="stylesheet" href="profile.css" />
+<style>
+  body { background: #0A0A0C; }
+  .proto-stage {
+    position: fixed; inset: 0;
+    background: #0A0A0C;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .proto-stage::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(74,83,255,0.10) 0%, transparent 50%),
+      radial-gradient(circle at 80% 90%, rgba(157,92,255,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .proto-shell {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .proto-meta {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-sans);
+    color: rgba(255,255,255,0.55);
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .proto-meta .dot { width: 6px; height: 6px; border-radius: 50%; background: #4A53FF; }
+  .proto-meta .step { color: rgba(255,255,255,0.85); }
+  .canvas-mode { position: fixed; inset: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="icons.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="dashboard.jsx"></script>
+<script type="text/babel" src="profile.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+const { ProfileScreen, NotificationsScreen, ExportScreen, AboutScreen, IOSFrame } = window;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "view": "canvas",
+  "screen": "profile"
+}/*EDITMODE-END*/;
+
+function renderScreen(screen, navigate) {
+  switch (screen) {
+    case "notifications": return <NotificationsScreen onBack={() => navigate("profile")} />;
+    case "export":        return <ExportScreen onBack={() => navigate("profile")} />;
+    case "about":         return <AboutScreen onBack={() => navigate("profile")} />;
+    case "profile":
+    default:              return <ProfileScreen onNavigate={navigate} />;
+  }
+}
+
+const SCREEN_FILE = {
+  profile:       "app/(tabs)/profile.tsx",
+  notifications: "app/profile/notifications.tsx",
+  export:        "app/profile/export.tsx",
+  about:         "app/profile/about.tsx",
+};
+
+function PrototypeMode({ tweaks, setTweak }) {
+  const navigate = (s) => setTweak("screen", s);
+  return (
+    <div className="proto-stage">
+      <div className="proto-shell">
+        <div className="proto-meta">
+          <span className="dot"></span>
+          <span>Coach AI · Profil</span>
+          <span style={{ opacity: 0.4 }}>—</span>
+          <span className="step">{SCREEN_FILE[tweaks.screen]}</span>
+        </div>
+        <IOSFrame>
+          {renderScreen(tweaks.screen, navigate)}
+        </IOSFrame>
+      </div>
+    </div>
+  );
+}
+
+const AB_W = 412;
+const AB_H = 866;
+
+function Artboard({ children }) {
+  return (
+    <div style={{ width: AB_W, height: AB_H, display: "flex",
+                  alignItems: "center", justifyContent: "center" }}>
+      <IOSFrame>{children}</IOSFrame>
+    </div>
+  );
+}
+
+function CanvasMode() {
+  return (
+    <div className="canvas-mode">
+      <DesignCanvas>
+        <DCSection
+          id="profile-main"
+          title="Profil — vue principale"
+          subtitle="app/(tabs)/profile.tsx — identité, boîtier associé, accès aux sous-écrans."
+        >
+          <DCArtboard id="pf-default" label="Par défaut" width={AB_W} height={AB_H}>
+            <Artboard><ProfileScreen /></Artboard>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="profile-notifications"
+          title="Préférences de notifications"
+          subtitle="app/profile/notifications.tsx — catégories, mode silencieux, urgences."
+        >
+          <DCArtboard id="pf-notif" label="Notifications" width={AB_W} height={AB_H}>
+            <Artboard><NotificationsScreen onBack={() => {}} /></Artboard>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="profile-export"
+          title="Export de données"
+          subtitle="app/profile/export.tsx — période, format, sélection des données à exporter."
+        >
+          <DCArtboard id="pf-export" label="Export" width={AB_W} height={AB_H}>
+            <Artboard><ExportScreen onBack={() => {}} /></Artboard>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="profile-about"
+          title="À propos"
+          subtitle="app/profile/about.tsx — version, équipe, documents légaux."
+        >
+          <DCArtboard id="pf-about" label="À propos" width={AB_W} height={AB_H}>
+            <Artboard><AboutScreen onBack={() => {}} /></Artboard>
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+    </div>
+  );
+}
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  return (
+    <>
+      {tweaks.view === "prototype"
+        ? <PrototypeMode tweaks={tweaks} setTweak={setTweak} />
+        : <CanvasMode />}
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Mode d'affichage">
+          <TweakRadio
+            label="Vue"
+            value={tweaks.view}
+            onChange={v => setTweak("view", v)}
+            options={[
+              { value: "prototype", label: "Prototype" },
+              { value: "canvas", label: "Canvas" },
+            ]}
+          />
+        </TweakSection>
+
+        {tweaks.view === "prototype" && (
+          <TweakSection title="Navigation">
+            <TweakSelect
+              label="Écran"
+              value={tweaks.screen}
+              onChange={v => setTweak("screen", v)}
+              options={[
+                { value: "profile",       label: "Profil" },
+                { value: "notifications", label: "Notifications" },
+                { value: "export",        label: "Export" },
+                { value: "about",         label: "À propos" },
+              ]}
+            />
+          </TweakSection>
+        )}
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
