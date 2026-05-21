@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Coach AI — Chatbot</title>
+<link rel="stylesheet" href="screens.css" />
+<link rel="stylesheet" href="dashboard.css" />
+<link rel="stylesheet" href="alerts.css" />
+<link rel="stylesheet" href="chat.css" />
+<style>
+  body { background: #0A0A0C; }
+  .proto-stage {
+    position: fixed; inset: 0;
+    background: #0A0A0C;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .proto-stage::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(74,83,255,0.10) 0%, transparent 50%),
+      radial-gradient(circle at 80% 90%, rgba(157,92,255,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .proto-shell {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .proto-meta {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-sans);
+    color: rgba(255,255,255,0.55);
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .proto-meta .dot { width: 6px; height: 6px; border-radius: 50%; background: #4A53FF; }
+  .proto-meta .step { color: rgba(255,255,255,0.85); }
+  .canvas-mode { position: fixed; inset: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="icons.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="dashboard.jsx"></script>
+<script type="text/babel" src="chat.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+const { ChatScreen, ConversationDrawer, IOSFrame } = window;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "view": "canvas",
+  "screen": "chat",
+  "conversationId": "c_001",
+  "state": "default",
+  "streaming": false,
+  "drawerOpen": false
+}/*EDITMODE-END*/;
+
+function PrototypeMode({ tweaks, setTweak }) {
+  const [drawerOpen, setDrawerOpen] = useState(tweaks.drawerOpen);
+  const [activeId, setActiveId] = useState(tweaks.conversationId);
+  const [forceNew, setForceNew] = useState(tweaks.state === "new");
+
+  const state = forceNew ? "new" : tweaks.state;
+
+  return (
+    <div className="proto-stage">
+      <div className="proto-shell">
+        <div className="proto-meta">
+          <span className="dot"></span>
+          <span>Coach AI · Chatbot</span>
+          <span style={{ opacity: 0.4 }}>—</span>
+          <span className="step">app/(tabs)/chat.tsx</span>
+        </div>
+        <IOSFrame>
+          <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", flexDirection: "column" }}>
+            <ChatScreen
+              key={activeId + state + tweaks.streaming}
+              conversationId={activeId}
+              state={state}
+              streaming={tweaks.streaming}
+              onOpenDrawer={() => setDrawerOpen(true)}
+              onNewConversation={() => { setForceNew(true); setActiveId("c_new"); }}
+            />
+            {drawerOpen && (
+              <ConversationDrawer
+                activeId={activeId}
+                onClose={() => setDrawerOpen(false)}
+                onSelect={(id) => { setActiveId(id); setForceNew(false); setDrawerOpen(false); }}
+                onNew={() => { setForceNew(true); setActiveId("c_new"); setDrawerOpen(false); }}
+              />
+            )}
+          </div>
+        </IOSFrame>
+      </div>
+    </div>
+  );
+}
+
+const AB_W = 412;
+const AB_H = 866;
+
+function Artboard({ children }) {
+  return (
+    <div style={{ width: AB_W, height: AB_H, display: "flex",
+                  alignItems: "center", justifyContent: "center" }}>
+      <IOSFrame>{children}</IOSFrame>
+    </div>
+  );
+}
+
+function CanvasMode() {
+  return (
+    <div className="canvas-mode">
+      <DesignCanvas>
+        <DCSection
+          id="chat-active"
+          title="Conversation active — flux principal"
+          subtitle="app/(tabs)/chat.tsx — header avec titre, bulles user / coach, sources RAG, composer."
+        >
+          <DCArtboard id="chat-conv-1" label="Résumé de ma journée" width={AB_W} height={AB_H}>
+            <Artboard><ChatScreen conversationId="c_001" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="chat-conv-2" label="Habitudes de la semaine" width={AB_W} height={AB_H}>
+            <Artboard><ChatScreen conversationId="c_002" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="chat-streaming" label="Streaming SSE en cours" width={AB_W} height={AB_H}>
+            <Artboard><ChatScreen conversationId="c_001" streaming={true} /></Artboard>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="chat-new"
+          title="Nouvelle conversation — premier message"
+          subtitle="Hero d'accueil + 4 chips de suggestions tappables qui envoient le message direct."
+        >
+          <DCArtboard id="chat-empty" label="État initial" width={AB_W} height={AB_H}>
+            <Artboard><ChatScreen state="new" /></Artboard>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="chat-states"
+          title="États transverses"
+          subtitle="Loading messages, RAG indisponible, mode hors ligne, rate limit."
+        >
+          <DCArtboard id="chat-loading"     label="Loading initial"   width={AB_W} height={AB_H}>
+            <Artboard><ChatScreen state="loading" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="chat-rag-error"   label="RAG indisponible"  width={AB_W} height={AB_H}>
+            <Artboard><ChatScreen state="rag-error" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="chat-offline"     label="Mode hors ligne"   width={AB_W} height={AB_H}>
+            <Artboard><ChatScreen state="offline" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="chat-rate-limit"  label="Rate limit atteint" width={AB_W} height={AB_H}>
+            <Artboard><ChatScreen state="rate-limit" /></Artboard>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="chat-drawer"
+          title="Drawer des conversations"
+          subtitle="Slide-in 80 % largeur — sections Aujourd'hui / Cette semaine / Plus ancien."
+        >
+          <DCArtboard id="drawer-default" label="Avec historique" width={AB_W} height={AB_H}>
+            <Artboard>
+              <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", flexDirection: "column" }}>
+                <ChatScreen conversationId="c_001" />
+                <ConversationDrawer activeId="c_001" onClose={() => {}} onSelect={() => {}} onNew={() => {}} />
+              </div>
+            </Artboard>
+          </DCArtboard>
+          <DCArtboard id="drawer-empty" label="Premier jour — aucune conversation" width={AB_W} height={AB_H}>
+            <Artboard>
+              <div style={{ position: "relative", width: "100%", height: "100%", display: "flex", flexDirection: "column" }}>
+                <ChatScreen state="new" />
+                <ConversationDrawer empty={true} onClose={() => {}} onSelect={() => {}} onNew={() => {}} />
+              </div>
+            </Artboard>
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+    </div>
+  );
+}
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  return (
+    <>
+      {tweaks.view === "prototype"
+        ? <PrototypeMode tweaks={tweaks} setTweak={setTweak} />
+        : <CanvasMode />}
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Mode d'affichage">
+          <TweakRadio
+            label="Vue"
+            value={tweaks.view}
+            onChange={v => setTweak("view", v)}
+            options={[
+              { value: "prototype", label: "Prototype" },
+              { value: "canvas", label: "Canvas" },
+            ]}
+          />
+        </TweakSection>
+
+        {tweaks.view === "prototype" && (
+          <>
+            <TweakSection title="Conversation active">
+              <TweakSelect
+                label="Conversation"
+                value={tweaks.conversationId}
+                onChange={v => setTweak("conversationId", v)}
+                options={[
+                  { value: "c_001", label: "Résumé de ma journée" },
+                  { value: "c_002", label: "Habitudes de la semaine" },
+                  { value: "c_003", label: "Réunion de lundi" },
+                  { value: "c_004", label: "Combien de temps de code ?" },
+                ]}
+              />
+              <TweakSelect
+                label="État"
+                value={tweaks.state}
+                onChange={v => setTweak("state", v)}
+                options={[
+                  { value: "default",    label: "Par défaut" },
+                  { value: "new",        label: "Nouvelle conversation" },
+                  { value: "loading",    label: "Loading" },
+                  { value: "rag-error",  label: "RAG indisponible" },
+                  { value: "offline",    label: "Hors ligne" },
+                  { value: "rate-limit", label: "Rate limit" },
+                ]}
+              />
+              <TweakToggle
+                label="Streaming en cours"
+                value={tweaks.streaming}
+                onChange={v => setTweak("streaming", v)}
+              />
+            </TweakSection>
+          </>
+        )}
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

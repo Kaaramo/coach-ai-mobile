@@ -7,7 +7,7 @@ import { GoogleG } from '@/components/google-g';
 import { ScreenFrame } from '@/components/screen-frame';
 import { Btn } from '@/components/btn';
 import { Toast } from '@/components/toast';
-import { colors, type } from '@/constants/theme';
+import { colors, fonts, type } from '@/constants/theme';
 
 export default function Login() {
   const [state, setState] = useState<'default' | 'loading' | 'error'>('default');
@@ -21,18 +21,44 @@ export default function Login() {
     <ScreenFrame>
       {state === 'error' && <Toast message="Connexion impossible. Réessaie." />}
       <View style={{ height: 8 }} />
-      <Pressable
-        onPress={() => router.back()}
-        style={{
-          width: 40,
-          height: 40,
-          alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: 12,
-        }}
-      >
-        <ChevronLeft size={22} color={colors.text} strokeWidth={1.5} />
-      </Pressable>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Pressable
+          onPress={() => router.back()}
+          style={{
+            width: 40,
+            height: 40,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 12,
+          }}
+        >
+          <ChevronLeft size={22} color={colors.text} strokeWidth={1.5} />
+        </Pressable>
+        <Pressable
+          onPress={() => router.replace('/home')}
+          accessibilityLabel="Aller directement au dashboard (dev)"
+          hitSlop={8}
+          style={({ pressed }) => ({
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            borderRadius: 9999,
+            borderWidth: 1,
+            borderColor: colors.bgBorder,
+            backgroundColor: pressed ? colors.bgSurface : 'transparent',
+          })}
+        >
+          <Text
+            style={{
+              fontSize: 12,
+              fontFamily: fonts.sansSemiBold,
+              color: colors.primary,
+              letterSpacing: 0.6,
+            }}
+          >
+            DEV → Dashboard
+          </Text>
+        </Pressable>
+      </View>
       <View style={{ height: 40 }} />
       <CoachLogo size={56} />
       <View style={{ height: 40 }} />

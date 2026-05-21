@@ -15,6 +15,7 @@ import { Stepper } from '@/components/stepper';
 import { HeroIcon } from '@/components/hero-icon';
 import { Btn } from '@/components/btn';
 import { colors, fonts, radius, type } from '@/constants/theme';
+import { DEVICE } from '@/constants/profile-mock';
 
 function PulseDot() {
   const opacity = useSharedValue(1);
@@ -76,7 +77,7 @@ export default function Device() {
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
           <Cpu size={18} color={colors.accent} strokeWidth={1.5} />
           <Text style={{ ...type.bodyLarge, fontSize: 15, color: colors.text }}>
-            Raspberry Pi 5 — Edge AI
+            {DEVICE.type}
           </Text>
         </View>
         <View
@@ -91,7 +92,7 @@ export default function Device() {
           }}
         >
           <Text style={{ fontFamily: fonts.mono, fontSize: 13, color: colors.textSecondary }}>
-            device_id: rpi5-aghzout-001
+            device_id: {DEVICE.id}
           </Text>
         </View>
         <View

@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Coach AI — Onboarding (6 écrans)</title>
+<link rel="stylesheet" href="screens.css" />
+<style>
+  @keyframes spin { to { transform: rotate(360deg); } }
+  body { background: #f0eee9; }
+
+  /* Prototype host — full-bleed dark stage */
+  .proto-stage {
+    position: fixed; inset: 0;
+    background: #0A0A0C;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .proto-stage::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(74,83,255,0.10) 0%, transparent 50%),
+      radial-gradient(circle at 80% 90%, rgba(65,255,49,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .proto-shell {
+    position: relative;
+    z-index: 2;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 18px;
+  }
+  .proto-meta {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-sans);
+    color: rgba(255,255,255,0.55);
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .proto-meta .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #4A53FF;
+  }
+  .proto-meta .step {
+    color: rgba(255,255,255,0.85);
+  }
+
+  /* Step navigator chip */
+  .proto-nav {
+    position: relative;
+    z-index: 3;
+    display: flex; gap: 6px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 9999px;
+    padding: 6px;
+    backdrop-filter: blur(20px);
+  }
+  .proto-nav button {
+    min-width: 28px; height: 28px;
+    padding: 0 10px;
+    border-radius: 9999px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    font-family: var(--font-sans);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .proto-nav button:hover { color: #fff; background: rgba(255,255,255,0.06); }
+  .proto-nav button.active {
+    background: #4A53FF;
+    color: #fff;
+  }
+  .proto-nav button.done {
+    color: #41FF31;
+  }
+
+  .proto-restart {
+    position: fixed; right: 24px; top: 24px;
+    z-index: 5;
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.7);
+    padding: 8px 14px;
+    border-radius: 9999px;
+    font-family: var(--font-sans);
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    backdrop-filter: blur(20px);
+    transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .proto-restart:hover { color: #fff; background: rgba(255,255,255,0.08); }
+
+  /* Slide transition between screens */
+  .screen-slot {
+    position: relative;
+    width: 390px; height: 844px;
+  }
+  .screen-slot > * {
+    animation: slot-in 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  @keyframes slot-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Toy "main app" landing after onboarding */
+  .home-stub {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 18px;
+    padding: 24px;
+    background: radial-gradient(circle at 50% 20%, rgba(74,83,255,0.12) 0%, transparent 60%), #000;
+  }
+  .home-stub .checkmark {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(65,255,49,0.18) 0%, transparent 70%);
+    display: grid; place-items: center;
+    color: #41FF31;
+  }
+  .home-stub h2 {
+    font-size: 24px; font-weight: 700; color: #fff;
+    letter-spacing: -0.02em; text-align: center;
+  }
+  .home-stub p {
+    color: #B7B7BD; font-size: 15px; line-height: 1.5;
+    text-align: center; max-width: 280px;
+  }
+  .home-stub .hint {
+    margin-top: 12px;
+    font-size: 12px; color: #6E6E76;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="icons.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+const { SplashScreen, WelcomeScreen, LoginScreen,
+        PermissionsScreen, PreferencesScreen, DeviceScreen,
+        IOSFrame, Icons } = window;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "view": "canvas",
+  "loginVariant": "error",
+  "permissionsVariant": "default",
+  "deviceVariant": "online"
+}/*EDITMODE-END*/;
+
+// ─── Prototype mode ──────────────────────────────────────────────
+const STEP_LABELS = [
+  "Splash",
+  "Bienvenue",
+  "Login",
+  "Permissions",
+  "Préférences",
+  "Boîtier",
+  "App",
+];
+
+function HomeStub() {
+  return (
+    <div className="home-stub" data-screen-label="07 App (post-onboarding)">
+      <div className="checkmark">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M20 6 9 17l-5-5"/>
+        </svg>
+      </div>
+      <h2>Tu es prêt.</h2>
+      <p>Ton coach observe en arrière-plan. Tu seras notifié quand quelque chose mérite ton attention.</p>
+      <div className="hint">Bloc 2 — App principale</div>
+    </div>
+  );
+}
+
+function PrototypeMode({ tweaks }) {
+  const [step, setStep] = useState(0);
+  const next = () => setStep(s => Math.min(STEP_LABELS.length - 1, s + 1));
+  const goto = (i) => setStep(i);
+
+  // Reset toasts/loaders when stepping back via nav chip
+  const screen = (() => {
+    switch (step) {
+      case 0: return <SplashScreen onNext={next} />;
+      case 1: return <WelcomeScreen onNext={next} />;
+      case 2: return <LoginScreen state={tweaks.loginVariant} onNext={next} onBack={() => setStep(1)} />;
+      case 3: return <PermissionsScreen refused={tweaks.permissionsVariant === "refused"} onNext={next} />;
+      case 4: return <PreferencesScreen onNext={next} />;
+      case 5: return <DeviceScreen error={tweaks.deviceVariant === "error"} onNext={next} />;
+      case 6: return <HomeStub />;
+      default: return null;
+    }
+  })();
+
+  return (
+    <div className="proto-stage">
+      <button className="proto-restart" onClick={() => setStep(0)}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/>
+        </svg>
+        Recommencer
+      </button>
+
+      <div className="proto-shell">
+        <div className="proto-meta">
+          <span className="dot"></span>
+          <span>Coach AI · Onboarding</span>
+          <span style={{ opacity: 0.4 }}>—</span>
+          <span className="step">{step + 1}/{STEP_LABELS.length} · {STEP_LABELS[step]}</span>
+        </div>
+
+        <IOSFrame>
+          <div className="screen-slot" key={step}>
+            {screen}
+          </div>
+        </IOSFrame>
+
+        <div className="proto-nav" role="tablist" aria-label="Navigation onboarding">
+          {STEP_LABELS.map((lbl, i) => (
+            <button
+              key={i}
+              className={i === step ? "active" : (i < step ? "done" : "")}
+              onClick={() => goto(i)}
+              title={lbl}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Canvas mode (all 6 screens + alt states side-by-side) ───────
+const AB_W = 412;
+const AB_H = 866;
+
+function Artboard({ children }) {
+  return (
+    <div style={{
+      width: AB_W, height: AB_H,
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <IOSFrame>{children}</IOSFrame>
+    </div>
+  );
+}
+
+function CanvasMode() {
+  return (
+    <DesignCanvas>
+      <DCSection
+        id="primary-flow"
+        title="Coach AI · Onboarding — flux principal"
+        subtitle="Du splash au boîtier associé. 6 écrans, 1 seul tap-through."
+      >
+        <DCArtboard id="01-splash" label="01 · Splash" width={AB_W} height={AB_H}>
+          <Artboard><SplashScreen /></Artboard>
+        </DCArtboard>
+        <DCArtboard id="02-welcome" label="02 · Bienvenue" width={AB_W} height={AB_H}>
+          <Artboard><WelcomeScreen /></Artboard>
+        </DCArtboard>
+        <DCArtboard id="03-login" label="03 · Login Google" width={AB_W} height={AB_H}>
+          <Artboard><LoginScreen /></Artboard>
+        </DCArtboard>
+        <DCArtboard id="04-permissions" label="04 · Permissions push" width={AB_W} height={AB_H}>
+          <Artboard><PermissionsScreen /></Artboard>
+        </DCArtboard>
+        <DCArtboard id="05-preferences" label="05 · Préférences alertes" width={AB_W} height={AB_H}>
+          <Artboard><PreferencesScreen /></Artboard>
+        </DCArtboard>
+        <DCArtboard id="06-device" label="06 · Boîtier associé" width={AB_W} height={AB_H}>
+          <Artboard><DeviceScreen /></Artboard>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection
+        id="alt-states"
+        title="États alternatifs"
+        subtitle="Chargement, erreurs, refus — variantes des écrans clés."
+      >
+        <DCArtboard id="03-login-loading" label="Login · Loading" width={AB_W} height={AB_H}>
+          <Artboard><LoginScreen state="loading" /></Artboard>
+        </DCArtboard>
+        <DCArtboard id="03-login-error" label="Login · Erreur OAuth" width={AB_W} height={AB_H}>
+          <Artboard><LoginScreen state="error" /></Artboard>
+        </DCArtboard>
+        <DCArtboard id="04-perm-refused" label="Permissions · Refus" width={AB_W} height={AB_H}>
+          <Artboard><PermissionsScreen refused={true} /></Artboard>
+        </DCArtboard>
+        <DCArtboard id="05-pref-empty" label="Préférences · Tout désactivé" width={AB_W} height={AB_H}>
+          <Artboard><PreferencesScreen initial={{ health: false, productivity: false, meetings: false }} /></Artboard>
+        </DCArtboard>
+        <DCArtboard id="06-device-error" label="Boîtier · Aucun appareil" width={AB_W} height={AB_H}>
+          <Artboard><DeviceScreen error={true} /></Artboard>
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+// ─── App + Tweaks ────────────────────────────────────────────────
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  return (
+    <>
+      {tweaks.view === "prototype"
+        ? <PrototypeMode tweaks={tweaks} key={`${tweaks.loginVariant}-${tweaks.permissionsVariant}-${tweaks.deviceVariant}`} />
+        : <CanvasMode />}
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Mode d'affichage">
+          <TweakRadio
+            label="Vue"
+            value={tweaks.view}
+            onChange={v => setTweak("view", v)}
+            options={[
+              { value: "prototype", label: "Prototype" },
+              { value: "canvas", label: "Canvas" },
+            ]}
+          />
+        </TweakSection>
+
+        <TweakSection title="État Login (écran 3)">
+          <TweakRadio
+            label="Variante"
+            value={tweaks.loginVariant}
+            onChange={v => setTweak("loginVariant", v)}
+            options={[
+              { value: "default", label: "Défaut" },
+              { value: "loading", label: "Chargement" },
+              { value: "error", label: "Erreur OAuth" },
+            ]}
+          />
+        </TweakSection>
+
+        <TweakSection title="État Permissions (écran 4)">
+          <TweakRadio
+            label="Variante"
+            value={tweaks.permissionsVariant}
+            onChange={v => setTweak("permissionsVariant", v)}
+            options={[
+              { value: "default", label: "Défaut" },
+              { value: "refused", label: "Refusé" },
+            ]}
+          />
+        </TweakSection>
+
+        <TweakSection title="État Boîtier (écran 6)">
+          <TweakRadio
+            label="Variante"
+            value={tweaks.deviceVariant}
+            onChange={v => setTweak("deviceVariant", v)}
+            options={[
+              { value: "online", label: "En ligne" },
+              { value: "error", label: "Aucun boîtier" },
+            ]}
+          />
+        </TweakSection>
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

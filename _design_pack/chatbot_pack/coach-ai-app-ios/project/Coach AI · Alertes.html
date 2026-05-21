@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Coach AI — Alertes</title>
+<link rel="stylesheet" href="screens.css" />
+<link rel="stylesheet" href="dashboard.css" />
+<link rel="stylesheet" href="alerts.css" />
+<style>
+  body { background: #0A0A0C; }
+  .proto-stage {
+    position: fixed; inset: 0;
+    background: #0A0A0C;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .proto-stage::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(74,83,255,0.10) 0%, transparent 50%),
+      radial-gradient(circle at 80% 90%, rgba(157,92,255,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .proto-shell {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+  }
+  .proto-meta {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-sans);
+    color: rgba(255,255,255,0.55);
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .proto-meta .dot { width: 6px; height: 6px; border-radius: 50%; background: #4A53FF; }
+  .proto-meta .step { color: rgba(255,255,255,0.85); }
+  .canvas-mode { position: fixed; inset: 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="icons.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="dashboard.jsx"></script>
+<script type="text/babel" src="alerts.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+const { AlertsListScreen, AlertDetailScreen, IOSFrame } = window;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "view": "canvas",
+  "screen": "list",
+  "category": "all",
+  "state": "loaded",
+  "search": "",
+  "alertId": "a_001",
+  "detailState": "default"
+}/*EDITMODE-END*/;
+
+function PrototypeMode({ tweaks, setTweak }) {
+  const [openAlertId, setOpenAlertId] = useState(null);
+
+  const showDetail = tweaks.screen === "detail" || openAlertId;
+  const activeAlertId = openAlertId || tweaks.alertId;
+
+  return (
+    <div className="proto-stage">
+      <div className="proto-shell">
+        <div className="proto-meta">
+          <span className="dot"></span>
+          <span>Coach AI · Alertes</span>
+          <span style={{ opacity: 0.4 }}>—</span>
+          <span className="step">{showDetail ? "app/alert/[id].tsx" : "app/(tabs)/alerts.tsx"}</span>
+        </div>
+        <IOSFrame>
+          {showDetail ? (
+            <AlertDetailScreen
+              key={activeAlertId + tweaks.detailState}
+              alertId={activeAlertId}
+              state={tweaks.detailState}
+              onClose={() => { setOpenAlertId(null); setTweak("screen", "list"); }}
+            />
+          ) : (
+            <AlertsListScreen
+              key={tweaks.state + tweaks.category}
+              category={tweaks.category}
+              initialSearch={tweaks.search}
+              state={tweaks.state}
+              onOpenDetail={(a) => setOpenAlertId(a.id)}
+            />
+          )}
+        </IOSFrame>
+      </div>
+    </div>
+  );
+}
+
+const AB_W = 412;
+const AB_H = 866;
+
+function Artboard({ children }) {
+  return (
+    <div style={{ width: AB_W, height: AB_H, display: "flex",
+                  alignItems: "center", justifyContent: "center" }}>
+      <IOSFrame>{children}</IOSFrame>
+    </div>
+  );
+}
+
+function CanvasMode() {
+  return (
+    <div className="canvas-mode">
+      <DesignCanvas>
+        <DCSection
+          id="alerts-list"
+          title="Historique des alertes — filtres"
+          subtitle="app/(tabs)/alerts.tsx — liste paginée groupée par jour, filtrable par catégorie."
+        >
+          <DCArtboard id="al-all"          label="Toutes"        width={AB_W} height={AB_H}>
+            <Artboard><AlertsListScreen category="all" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="al-health"       label="Santé"         width={AB_W} height={AB_H}>
+            <Artboard><AlertsListScreen category="health" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="al-productivity" label="Productivité"  width={AB_W} height={AB_H}>
+            <Artboard><AlertsListScreen category="productivity" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="al-meeting"      label="Réunion"       width={AB_W} height={AB_H}>
+            <Artboard><AlertsListScreen category="meeting" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="al-rag"          label="RAG"           width={AB_W} height={AB_H}>
+            <Artboard><AlertsListScreen category="rag" /></Artboard>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="alerts-list-states"
+          title="Liste — états transverses"
+          subtitle="Loading, recherche vide, premier jour, filtre vide."
+        >
+          <DCArtboard id="al-loading"       label="Loading"               width={AB_W} height={AB_H}>
+            <Artboard><AlertsListScreen state="loading" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="al-search-empty"  label="Recherche sans résultat" width={AB_W} height={AB_H}>
+            <Artboard><AlertsListScreen initialSearch="vacances" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="al-empty-all"     label="Premier jour"          width={AB_W} height={AB_H}>
+            <Artboard><AlertsListScreen state="empty-all" /></Artboard>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="alerts-detail"
+          title="Détail d'une alerte — par catégorie"
+          subtitle="app/alert/[id].tsx — hero icon, contexte multimodal détecté, 3 actions."
+        >
+          <DCArtboard id="ad-health"        label="Santé · non actionnée"   width={AB_W} height={AB_H}>
+            <Artboard><AlertDetailScreen alertId="a_001" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="ad-productivity"  label="Productivité"            width={AB_W} height={AB_H}>
+            <Artboard><AlertDetailScreen alertId="a_002" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="ad-meeting"       label="Réunion · actionnée"     width={AB_W} height={AB_H}>
+            <Artboard><AlertDetailScreen alertId="a_003" state="actioned" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="ad-rag"           label="RAG · insight"           width={AB_W} height={AB_H}>
+            <Artboard><AlertDetailScreen alertId="a_004" /></Artboard>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="alerts-detail-states"
+          title="Détail — états transverses"
+          subtitle="Loading, alerte introuvable (404)."
+        >
+          <DCArtboard id="ad-loading" label="Loading" width={AB_W} height={AB_H}>
+            <Artboard><AlertDetailScreen state="loading" /></Artboard>
+          </DCArtboard>
+          <DCArtboard id="ad-404"     label="Alerte introuvable" width={AB_W} height={AB_H}>
+            <Artboard><AlertDetailScreen state="404" /></Artboard>
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+    </div>
+  );
+}
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  return (
+    <>
+      {tweaks.view === "prototype"
+        ? <PrototypeMode tweaks={tweaks} setTweak={setTweak} />
+        : <CanvasMode />}
+
+      <TweaksPanel title="Tweaks">
+        <TweakSection title="Mode d'affichage">
+          <TweakRadio
+            label="Vue"
+            value={tweaks.view}
+            onChange={v => setTweak("view", v)}
+            options={[
+              { value: "prototype", label: "Prototype" },
+              { value: "canvas", label: "Canvas" },
+            ]}
+          />
+          <TweakRadio
+            label="Écran"
+            value={tweaks.screen}
+            onChange={v => setTweak("screen", v)}
+            options={[
+              { value: "list",   label: "Liste" },
+              { value: "detail", label: "Détail" },
+            ]}
+          />
+        </TweakSection>
+
+        {tweaks.screen === "list" && (
+          <TweakSection title="Liste — filtres et état">
+            <TweakSelect
+              label="Catégorie"
+              value={tweaks.category}
+              onChange={v => setTweak("category", v)}
+              options={[
+                { value: "all",          label: "Toutes" },
+                { value: "health",       label: "Santé" },
+                { value: "productivity", label: "Productivité" },
+                { value: "meeting",      label: "Réunion" },
+                { value: "rag",          label: "RAG" },
+              ]}
+            />
+            <TweakText
+              label="Recherche"
+              value={tweaks.search}
+              onChange={v => setTweak("search", v)}
+              placeholder="Mot-clé…"
+            />
+            <TweakSelect
+              label="État"
+              value={tweaks.state}
+              onChange={v => setTweak("state", v)}
+              options={[
+                { value: "loaded",    label: "Chargé" },
+                { value: "loading",   label: "Loading" },
+                { value: "empty-all", label: "Premier jour (vide)" },
+              ]}
+            />
+          </TweakSection>
+        )}
+
+        {tweaks.screen === "detail" && (
+          <TweakSection title="Détail">
+            <TweakSelect
+              label="Alerte"
+              value={tweaks.alertId}
+              onChange={v => setTweak("alertId", v)}
+              options={[
+                { value: "a_001", label: "Santé · Hydratation" },
+                { value: "a_002", label: "Productivité · Pause" },
+                { value: "a_003", label: "Réunion · Synthèse" },
+                { value: "a_004", label: "RAG · Insight matinal" },
+              ]}
+            />
+            <TweakSelect
+              label="État"
+              value={tweaks.detailState}
+              onChange={v => setTweak("detailState", v)}
+              options={[
+                { value: "default",  label: "Par défaut" },
+                { value: "actioned", label: "Déjà actionnée" },
+                { value: "loading",  label: "Loading" },
+                { value: "404",      label: "Introuvable" },
+              ]}
+            />
+          </TweakSection>
+        )}
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
