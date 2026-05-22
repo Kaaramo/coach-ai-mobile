@@ -21,7 +21,7 @@ export default function Login() {
     <ScreenFrame>
       {lastError === 'failed' && <Toast message="Connexion impossible. Réessaie." />}
       <View style={{ height: 8 }} />
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Pressable
           onPress={() => router.back()}
           style={{
@@ -33,30 +33,6 @@ export default function Login() {
           }}
         >
           <ChevronLeft size={22} color={colors.text} strokeWidth={1.5} />
-        </Pressable>
-        <Pressable
-          onPress={() => router.replace('/home')}
-          accessibilityLabel="Aller directement au dashboard (dev)"
-          hitSlop={8}
-          style={({ pressed }) => ({
-            paddingVertical: 8,
-            paddingHorizontal: 12,
-            borderRadius: 9999,
-            borderWidth: 1,
-            borderColor: colors.bgBorder,
-            backgroundColor: pressed ? colors.bgSurface : 'transparent',
-          })}
-        >
-          <Text
-            style={{
-              fontSize: 12,
-              fontFamily: fonts.sansSemiBold,
-              color: colors.primary,
-              letterSpacing: 0.6,
-            }}
-          >
-            DEV → Dashboard
-          </Text>
         </Pressable>
       </View>
       <View style={{ height: 40 }} />
