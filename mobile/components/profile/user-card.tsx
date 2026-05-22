@@ -1,9 +1,18 @@
 import { Platform, Pressable, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Image } from 'expo-image';
 import { colors, fonts } from '@/constants/theme';
 import { USER } from '@/constants/profile-mock';
+import { useAuth } from '@/lib/auth-context';
 
 export function UserCard() {
+  const { user } = useAuth();
+
+  const name = user?.name ?? USER.name;
+  const email = user?.email ?? USER.email;
+  const initials = user?.initials ?? USER.initials;
+  const picture = user?.picture;
+
   return (
     <View
       style={{
@@ -25,29 +34,38 @@ export function UserCard() {
           default: {},
         })}
       >
-        <LinearGradient
-          colors={['#4A53FF', '#41FF31']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            width: 96,
-            height: 96,
-            borderRadius: 48,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Text
+        {picture ? (
+          <Image
+            source={{ uri: picture }}
+            style={{ width: 96, height: 96, borderRadius: 48 }}
+            contentFit="cover"
+            transition={150}
+          />
+        ) : (
+          <LinearGradient
+            colors={['#4A53FF', '#41FF31']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
             style={{
-              fontSize: 36,
-              fontFamily: fonts.sansBold,
-              color: '#FFFFFF',
-              letterSpacing: -0.72,
+              width: 96,
+              height: 96,
+              borderRadius: 48,
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            {USER.initials}
-          </Text>
-        </LinearGradient>
+            <Text
+              style={{
+                fontSize: 36,
+                fontFamily: fonts.sansBold,
+                color: '#FFFFFF',
+                letterSpacing: -0.72,
+              }}
+            >
+              {initials}
+            </Text>
+          </LinearGradient>
+        )}
       </View>
       <Text
         style={{
@@ -58,7 +76,7 @@ export function UserCard() {
           marginTop: 16,
         }}
       >
-        {USER.name}
+        {name}
       </Text>
       <Text
         style={{
@@ -68,7 +86,7 @@ export function UserCard() {
           marginTop: 4,
         }}
       >
-        {USER.email}
+        {email}
       </Text>
       <Pressable
         disabled

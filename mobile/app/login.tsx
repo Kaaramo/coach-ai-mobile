@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
@@ -8,18 +8,18 @@ import { ScreenFrame } from '@/components/screen-frame';
 import { Btn } from '@/components/btn';
 import { Toast } from '@/components/toast';
 import { colors, fonts, type } from '@/constants/theme';
+import { useAuth } from '@/lib/auth-context';
 
 export default function Login() {
-  const [state, setState] = useState<'default' | 'loading' | 'error'>('default');
+  const { user, signInWithGoogle, signingIn, authReady, lastError } = useAuth();
 
-  const handleGoogle = () => {
-    setState('loading');
-    setTimeout(() => router.push('/permissions'), 1400);
-  };
+  useEffect(() => {
+    if (user) router.replace('/permissions');
+  }, [user]);
 
   return (
     <ScreenFrame>
-      {state === 'error' && <Toast message="Connexion impossible. Réessaie." />}
+      {lastError === 'failed' && <Toast message="Connexion impossible. Réessaie." />}
       <View style={{ height: 8 }} />
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
         <Pressable
@@ -70,11 +70,12 @@ export default function Login() {
       <View style={{ height: 40 }} />
       <Btn
         variant="google"
-        onPress={handleGoogle}
-        loading={state === 'loading'}
-        leading={state === 'loading' ? null : <GoogleG size={22} />}
+        onPress={signInWithGoogle}
+        disabled={!authReady || signingIn}
+        loading={signingIn}
+        leading={signingIn ? null : <GoogleG size={22} />}
       >
-        {state === 'loading' ? 'Connexion…' : 'Continuer avec Google'}
+        {signingIn ? 'Connexion…' : 'Continuer avec Google'}
       </Btn>
       <View style={{ flex: 1, minHeight: 16 }} />
       <Text

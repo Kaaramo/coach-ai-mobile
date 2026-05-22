@@ -17,7 +17,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors, fonts } from '@/constants/theme';
 import {
-  CONVERSATIONS,
   type Conversation,
   type ConvId,
   GROUP_LABEL,
@@ -30,23 +29,22 @@ type Section = {
 };
 
 type Props = {
-  activeId: ConvId;
+  activeId: ConvId | null;
+  conversations: Conversation[];
   onClose: () => void;
   onSelect: (id: ConvId) => void;
   onNew: () => void;
-  empty?: boolean;
 };
 
-export function ConversationDrawer({ activeId, onClose, onSelect, onNew, empty }: Props) {
+export function ConversationDrawer({ activeId, conversations, onClose, onSelect, onNew }: Props) {
   const [search, setSearch] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
   const sections: Section[] = useMemo(() => {
-    if (empty) return [];
     const q = search.trim().toLowerCase();
     const list = q
-      ? CONVERSATIONS.filter(c => c.title.toLowerCase().includes(q))
-      : CONVERSATIONS;
+      ? conversations.filter(c => c.title.toLowerCase().includes(q))
+      : conversations;
     const grouped: Record<Group, Conversation[]> = { today: [], week: [], older: [] };
     for (const c of list) grouped[c.group].push(c);
     const out: Section[] = [];
@@ -54,7 +52,7 @@ export function ConversationDrawer({ activeId, onClose, onSelect, onNew, empty }
       if (grouped[g].length > 0) out.push({ title: g, data: grouped[g] });
     });
     return out;
-  }, [search, empty]);
+  }, [search, conversations]);
 
   const showEmpty = sections.length === 0 && !search;
 

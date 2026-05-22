@@ -14,6 +14,7 @@ import { colors, fonts } from '@/constants/theme';
 import { VERSION } from '@/constants/profile-mock';
 import type { TabId } from '@/constants/dashboard-mock';
 import { dispatchTab } from '@/lib/tab-nav';
+import { useAuth } from '@/lib/auth-context';
 import { Toast } from '@/components/toast';
 import { TabBar } from '@/components/dashboard/tab-bar';
 import { UserCard } from '@/components/profile/user-card';
@@ -23,8 +24,14 @@ import { SettingsListItem } from '@/components/profile/settings-list-item';
 
 export default function ProfileMain() {
   const insets = useSafeAreaInsets();
+  const { user, signOut } = useAuth();
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleLogout = async () => {
+    await signOut();
+    router.replace('/welcome');
+  };
 
   const showToast = (msg: string) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -86,8 +93,8 @@ export default function ProfileMain() {
         <View style={{ marginTop: 32, marginHorizontal: 24, gap: 12 }}>
           <GhostButton
             icon={<LogOut size={20} color={colors.text} strokeWidth={1.75} />}
-            label="Déconnexion"
-            onPress={() => showToast('Bientôt disponible')}
+            label={user ? 'Déconnexion' : 'Déconnexion (aucun compte)'}
+            onPress={user ? handleLogout : () => showToast('Aucun compte connecté')}
           />
           <DangerButton
             icon={<Trash2 size={20} color={colors.error} strokeWidth={1.75} />}
