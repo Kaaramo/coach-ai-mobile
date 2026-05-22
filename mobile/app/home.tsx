@@ -19,6 +19,7 @@ import {
 } from '@/constants/dashboard-mock';
 import type { Period, TabId } from '@/constants/dashboard-mock';
 import { dispatchTab } from '@/lib/tab-nav';
+import { useAuth } from '@/lib/auth-context';
 import { Toast } from '@/components/toast';
 import { DashboardHeader } from '@/components/dashboard/header';
 import { InsightCard } from '@/components/dashboard/insight-card';
@@ -32,6 +33,13 @@ import { TabBar } from '@/components/dashboard/tab-bar';
 const LOADING = false;
 const EMPTY = false;
 const OFFLINE = false;
+
+function timeBasedGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return 'Bonjour';
+  if (h < 18) return 'Bon après-midi';
+  return 'Bonsoir';
+}
 
 function StaggerView({ index, children }: { index: number; children: React.ReactNode }) {
   const opacity = useSharedValue(0);
@@ -53,12 +61,16 @@ function StaggerView({ index, children }: { index: number; children: React.React
 
 export default function Home() {
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
   const [period, setPeriod] = useState<Period>('day');
   const [activeTab, setActiveTab] = useState<TabId>('home');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const data = habitsByRange[period];
+  const displayName = user?.givenName ?? user?.name ?? 'Karamo';
+  const displayInitial = user?.initials?.charAt(0) ?? 'K';
+  const greeting = timeBasedGreeting();
 
   const showToast = (msg: string) => {
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -86,6 +98,10 @@ export default function Home() {
       <DashboardHeader
         unread={totalUnreadCount}
         onBellPress={() => router.replace('/alerts')}
+        name={displayName}
+        initial={displayInitial}
+        greeting={greeting}
+        picture={user?.picture}
       />
       <ScrollView
         contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 16, paddingBottom: 32 }}

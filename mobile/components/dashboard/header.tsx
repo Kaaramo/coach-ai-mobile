@@ -1,5 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Image } from 'expo-image';
 import { BellRing } from 'lucide-react-native';
 import { colors, fonts } from '@/constants/theme';
 
@@ -9,6 +10,7 @@ type Props = {
   initial?: string;
   greeting?: string;
   name?: string;
+  picture?: string;
 };
 
 export function DashboardHeader({
@@ -17,6 +19,7 @@ export function DashboardHeader({
   initial = 'K',
   greeting = 'Bonjour',
   name = 'Karamo',
+  picture,
 }: Props) {
   return (
     <View
@@ -31,31 +34,40 @@ export function DashboardHeader({
         borderBottomColor: colors.bgBorder,
       }}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 0 }}>
-        <LinearGradient
-          colors={['#4A53FF', '#9D5CFF']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Text
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minWidth: 0, flex: 1 }}>
+        {picture ? (
+          <Image
+            source={{ uri: picture }}
+            style={{ width: 40, height: 40, borderRadius: 20 }}
+            contentFit="cover"
+            transition={150}
+          />
+        ) : (
+          <LinearGradient
+            colors={['#4A53FF', '#9D5CFF']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
             style={{
-              fontSize: 15,
-              fontFamily: fonts.sansSemiBold,
-              color: '#FFFFFF',
-              letterSpacing: -0.15,
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            {initial}
-          </Text>
-        </LinearGradient>
-        <View style={{ flexDirection: 'column', gap: 1, minWidth: 0 }}>
+            <Text
+              style={{
+                fontSize: 15,
+                fontFamily: fonts.sansSemiBold,
+                color: '#FFFFFF',
+                letterSpacing: -0.15,
+              }}
+            >
+              {initial}
+            </Text>
+          </LinearGradient>
+        )}
+        <View style={{ flexDirection: 'column', gap: 1, minWidth: 0, flex: 1 }}>
           <Text
             style={{
               fontSize: 11,
@@ -69,6 +81,7 @@ export function DashboardHeader({
             {greeting}
           </Text>
           <Text
+            numberOfLines={1}
             style={{
               fontSize: 17,
               fontFamily: fonts.sansSemiBold,
